@@ -2,7 +2,7 @@
 
 #Get Current run directory directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+EXPORT DIR
 #Get MySQL Root Password and put it in a variable
 rootdbpassword=$(grep root_mysql /root/.digitalocean_password | sed 's#"##g' | sed 's#root_mysql_pass=##g')
 
@@ -15,7 +15,7 @@ fi
 echo "Setting variables from wb.conf file"
 echo ""
 set -o allexport
-source wb.conf
+source $DIR/wb.conf
 
 echo "Adding Digital Ocean Non Root User"
 useradd -m -p $DO_USER_PW -s /bin/bash $DO_USERNAME

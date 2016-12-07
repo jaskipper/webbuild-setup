@@ -43,14 +43,9 @@ then
   fi
 fi
 
-if [ ! $SSLHALT=1 ]
-then
-  letsencrypt --apache $DOMAIN_NAME_ENCRYPT $DOMAIN_WWW_ENCRYPT $DOMAIN_CHURCHCRM_ENCRYPT $DOMAIN_OWNCLOUD_ENCRYPT
-fi
+letsencrypt --apache $DOMAIN_NAME_ENCRYPT $DOMAIN_WWW_ENCRYPT $DOMAIN_CHURCHCRM_ENCRYPT $DOMAIN_OWNCLOUD_ENCRYPT
 
 echo "30 2 * * 1 /usr/local/sbin/certbot-auto renew >> /var/log/le-renew.log" >> /var/spool/cron/crontabs/root
 chmod 600 /var/spool/cron/crontabs/root
 
 service apache2 reload
-
-echo "Successfully installed and Set up your SSL Certificates!"
