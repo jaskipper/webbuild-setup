@@ -1,0 +1,74 @@
+#!/bin/bash
+
+echo ""
+echo "#   Installing Latest OwnCloud and Dependencies    #"
+echo ""
+
+PKG_NAME=php7.0-mbstring
+PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $PKG_NAME|grep "install ok installed")
+echo Checking for $PKG_NAME: $PKG_OK
+if [ "" == "$PKG_OK" ]; then
+  echo "No $PKG_NAME. Setting up $PKG_NAME."
+  sudo apt --yes install $PKG_NAME
+fi
+
+PKG_NAMEphp-imagick
+PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $PKG_NAME|grep "install ok installed")
+echo Checking for $PKG_NAME: $PKG_OK
+if [ "" == "$PKG_OK" ]; then
+  echo "No $PKG_NAME. Setting up $PKG_NAME."
+  sudo apt --yes install $PKG_NAME
+fi
+
+PKG_NAME=php7.0-intl
+PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $PKG_NAME|grep "install ok installed")
+echo Checking for $PKG_NAME: $PKG_OK
+if [ "" == "$PKG_OK" ]; then
+  echo "No $PKG_NAME. Setting up $PKG_NAME."
+  sudo apt --yes install $PKG_NAME
+fi
+
+curl https://download.owncloud.org/download/repositories/stable/Ubuntu_16.04/Release.key | sudo apt-key add -
+echo 'deb https://download.owncloud.org/download/repositories/stable/Ubuntu_16.04/ /' | sudo tee /etc/apt/sources.list.d/owncloud.list
+
+apt update
+
+apt --yes install owncloud
+
+echo ""
+echo "#       Creating OWNCLOUD User and Database        #"
+echo ""
+
+mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $OWNCLOUD_DATABASE;"
+echo "Database \"$OWNCLOUD_DATABASE\" created"
+mysql -uroot -e "CREATE USER IF NOT EXISTS '$OWNCLOUD_DB_USER'@'localhost' IDENTIFIED BY '$OWNCLOUD_DB_PASSWORD';"
+echo "User \"$OWNCLOUD_DB_USER\" created @localhost with password \"$OWNCLOUD_DB_PASSWORD\""
+mysql -uroot -e "GRANT ALL PRIVILEGES ON $OWNCLOUD_DATABASE.* TO '$OWNCLOUD_DB_USER'@'localhost';"
+echo "Granting all privileges on \"$OWNCLOUD_DATABASE\" to '$OWNCLOUD_DB_USER'@'localhost'"
+mysql -uroot -e "FLUSH PRIVILEGES;"
+
+echo "Finished OwnCloud Database setup successfully"
+
+#echo "Setting up OwnCloud Config file"
+#cp /var/www/owncloud/config/config.sample.php /var/www/owncloud/config/config.php
+
+#sed -i "s#'=> \'sqlite\''#'=> \'mysql\''#g" /var/www/owncloud/config/config.php
+#sed -i "s#'\'dbhost\' => \'\''#'\'dbhost\' => \'$MYSQL_DB_HOST\''#g" /var/www/owncloud/config/config.php
+#sed -i "s#'\'dbname\' => \'owncloud\''#'\'dbname\' => \'$OWNCLOUD_DATABASE\''#g" /var/www/owncloud/config/config.php
+#sed -i "s#'\'dbuser\' => \'\''#'\'dbuser\' => \'\'$OWNCLOUD_DB_USER'#g" /var/www/owncloud/config/config.php
+#sed -i "s#'\'dbpassword\' => \'\''#'\'dbuser\' => \'\'$OWNCLOUD_DB_PASSWORD'#g" /var/www/owncloud/config/config.php
+#sed -i "s#example.com#$DOMAIN_NAME#g" /var/www/owncloud/config/config.php
+
+echo "Setting up Apache Virtual Host for OwnCloud"
+
+cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+
+sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+sed -i "s#/var/www/html#/var/www/owncloud#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+
+a2ensite /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME
+
+service apache2 reload
+
+echo "Successfully installed and Set up OwnCloud!"

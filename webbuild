@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#Get Current run directory directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#Get MySQL Root Password and put it in a variable
+rootdbpassword=$(grep root_mysql /root/.digitalocean_password | sed 's#"##g' | sed 's#root_mysql_pass=##g')
+
+echo "Removing Root MySQL Configuration file"
+if [ -f /root/.my.cnf ]; then
+  rm /root/.my.cnf
+fi
+
+#Getting .env variables
+echo ""
+echo "#         Setting variables from wb.conf file       #"
+echo ""
+set -o allexport
+source wb.conf
+
+echo "Adding Digital Ocean Non Root User"
+useradd -m -p $DO_USER_PW -s /bin/bash $DO_USERNAME
+gpasswd -a $DO_USERNAME sudo
+
+echo ""
+echo "#         Wordpress Plugins & Themes Setup          #"
+echo ""
+
+DEBIAN_FRONTEND=noninteractive apt
+apt -- yes update && apt --yes install unzip
+
+cd /var/www/html/wp-content/plugins
+wget https://skipperinnovations.com/app/uploads/2016/11/webbuildplugins.zip
+unzip webbuildplugins.zip
+chown -R www-data:www-data webbuildplugins
+chmod -R 755 webbuildplugins
+find ./webbuildplugins/. -type f -exec chmod 644 {} +
+mv webbuildplugins/. .
+rm webbuildplugins.zip
+
+echo "Creating New Root MySQL Configuration file"
+echo "[client]" >> /root/.my.cnf
+echo "user=root" >> /root/.my.cnf
+echo "password=$rootdbpassword" >> /root/.my.cnf
+
+echo "Changing Permissions on Root MySQL Configuration file"
+chmod 600 /root/.my.cnf
+
+echo "Setting up Apache Virtual Host for $DOMAIN_NAME"
+
+#Just making sure that they didn't put www before the domain name.
+DOMAIN_NAME=$(sed 's/www.//g' <<<"$DOMAIN_NAME")
+
+cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_NAME.conf
+
+sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "s#/var/www/html#/var/www/html#g" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "/ServerAdmin/a         ServerName $DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "/ServerName/a         ServerAlias www.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+
+a2ensite /etc/apache2/sites-available/$DOMAIN_NAME
+service apache2 reload
+
+if [ $CHURCHCRM_INSTALL = "yes" ];
+then
+  echo "Installing ChurchCRM"
+  $DIR/install-files/churchcrm
+fi #End ChurchCRM
+
+if [ $OWNCLOUD_INSTALL = "yes" ]
+then
+  echo "Installing OwnCloud"
+  $DIR/install-files/owncloud
+fi
+
+if [ $SSL_INSTALL = "yes" ];
+then
+  echo "Installing SSL"
+  $DIR/install-files/sslsetup
+fi
