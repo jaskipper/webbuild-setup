@@ -12,8 +12,7 @@ if [ -f /root/.my.cnf ]; then
 fi
 
 #Getting .env variables
-echo ""
-echo "#         Setting variables from wb.conf file       #"
+echo "Setting variables from wb.conf file"
 echo ""
 set -o allexport
 source wb.conf
@@ -22,21 +21,21 @@ echo "Adding Digital Ocean Non Root User"
 useradd -m -p $DO_USER_PW -s /bin/bash $DO_USERNAME
 gpasswd -a $DO_USERNAME sudo
 
-echo ""
-echo "#         Wordpress Plugins & Themes Setup          #"
-echo ""
-
 DEBIAN_FRONTEND=noninteractive apt
-apt -- yes update && apt --yes install unzip
+apt -- yes update && apt --yes install unzip jq
 
-cd /var/www/html/wp-content/plugins
-wget https://skipperinnovations.com/app/uploads/2016/11/webbuildplugins.zip
-unzip webbuildplugins.zip
-chown -R www-data:www-data webbuildplugins
-chmod -R 755 webbuildplugins
-find ./webbuildplugins/. -type f -exec chmod 644 {} +
-mv webbuildplugins/. .
-rm webbuildplugins.zip
+echo "Wordpress Plugins & Themes Setup"
+echo ""
+
+#cd /var/www/html/wp-content/plugins
+
+#wget https://skipperinnovations.com/app/uploads/2016/11/webbuildplugins.zip
+#unzip webbuildplugins.zip
+#chown -R www-data:www-data webbuildplugins
+#chmod -R 755 webbuildplugins
+#find ./webbuildplugins/. -type f -exec chmod 644 {} +
+#mv webbuildplugins/. .
+#rm webbuildplugins.zip
 
 echo "Creating New Root MySQL Configuration file"
 echo "[client]" >> /root/.my.cnf

@@ -5,7 +5,6 @@ echo ""
 
 cd /var/www
 
-apt --yes install jq
 curl -sOL "$(jq -r ".assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases/latest" ))"
 crmzip=$(find -iname Church*.zip)
 unzip $crmzip
