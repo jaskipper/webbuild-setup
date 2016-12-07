@@ -4,8 +4,10 @@ echo "#   Installing Latest ChurchCRM and Dependencies    #"
 echo ""
 
 cd /var/www
-
-curl -sOL "$(jq -r ".assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases/latest" ))"
+#Download Latest Stable release
+#curl -sOL "$(jq -r ".assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases/latest" ))"
+#Download Latest PR
+curl -sOL "$(jq -r ".[0] | .assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases" ))"
 crmzip=$(find -iname Church*.zip)
 unzip $crmzip
 rm $crmzip
@@ -61,7 +63,7 @@ sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAI
 sed -i "s#/var/www/html#/var/www/churchcrm#g" /etc/apache2/sites-available/$DOMAIN_CHURCHCRM.$DOMAIN_NAME.conf
 sed -i "/ServerAdmin/a         ServerName $DOMAIN_CHURCHCRM.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_CHURCHCRM.$DOMAIN_NAME.conf
 
-a2ensite /etc/apache2/sites-available/$DOMAIN_CHURCHCRM.$DOMAIN_NAME
+a2ensite $DOMAIN_CHURCHCRM.$DOMAIN_NAME
 
 service apache2 reload
 

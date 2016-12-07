@@ -67,7 +67,7 @@ sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAI
 sed -i "s#/var/www/html#/var/www/owncloud#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
 sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
 
-a2ensite /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME
+a2ensite $DOMAIN_OWNCLOUD.$DOMAIN_NAME
 
 service apache2 reload
 
