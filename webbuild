@@ -22,7 +22,8 @@ useradd -m -p $DO_USER_PW -s /bin/bash $DO_USERNAME
 gpasswd -a $DO_USERNAME sudo
 
 DEBIAN_FRONTEND=noninteractive apt
-apt -- yes update && apt --yes install unzip jq
+apt --yes update
+apt --yes install unzip jq
 
 echo "Wordpress Plugins & Themes Setup"
 echo ""
