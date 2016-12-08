@@ -4,14 +4,18 @@ echo ""
 echo "#   Moving OwnCloud Files to Attached Volume    #"
 echo ""
 
+#Getting .env variables
+set -o allexport
+source ../wb.conf
+
 echo -e "Stopping Apache server to move your Owncloud Data"
-sudo systemctl stop apache2
+systemctl stop apache2
 
 echo -e "Moving your Data to /mnt/owncloud"
-sudo mv /var/www/owncloud/data /mnt/owncloud/
+mv /var/www/owncloud/data /mnt/$VOLUME_NAME/owncloud/
 
 echo -e "Changing your configuration..."
-sed -i "s#/var/www/owncloud/data#/mnt/owncloud/data#g" /var/www/owncloud/config/config.php
+sed -i "s#/var/www/owncloud/data#/mnt/$VOLUME_NAME/owncloud/data#g" /var/www/owncloud/config/config.php
 
 echo -e "Starting Apache Server again"
 systemctl start apache2

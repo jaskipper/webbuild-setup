@@ -53,15 +53,16 @@ mysql -uroot -e "FLUSH PRIVILEGES;"
 
 echo "Finished OwnCloud Database setup successfully"
 
-#echo "Setting up OwnCloud Config file"
-#cp /var/www/owncloud/config/config.sample.php /var/www/owncloud/config/config.php
+echo "Setting up OwnCloud Config file"
+cp /var/www/owncloud/config/config.sample.php /var/www/owncloud/config/config.php
 
-#sed -i "s#'=> \'sqlite\''#'=> \'mysql\''#g" /var/www/owncloud/config/config.php
-#sed -i "s#'\'dbhost\' => \'\''#'\'dbhost\' => \'$MYSQL_DB_HOST\''#g" /var/www/owncloud/config/config.php
-#sed -i "s#'\'dbname\' => \'owncloud\''#'\'dbname\' => \'$OWNCLOUD_DATABASE\''#g" /var/www/owncloud/config/config.php
-#sed -i "s#'\'dbuser\' => \'\''#'\'dbuser\' => \'\'$OWNCLOUD_DB_USER'#g" /var/www/owncloud/config/config.php
-#sed -i "s#'\'dbpassword\' => \'\''#'\'dbuser\' => \'\'$OWNCLOUD_DB_PASSWORD'#g" /var/www/owncloud/config/config.php
-#sed -i "s#example.com#$DOMAIN_NAME#g" /var/www/owncloud/config/config.php
+sed -i "s#'=> \'sqlite\''#'=> \'mysql\''#g" /var/www/owncloud/config/config.php
+sed -i "s#'\'dbhost\' => \'\''#'\'dbhost\' => \'$MYSQL_DB_HOST\''#g" /var/www/owncloud/config/config.php
+sed -i "s#'\'dbname\' => \'owncloud\''#'\'dbname\' => \'$OWNCLOUD_DATABASE\''#g" /var/www/owncloud/config/config.php
+sed -i "s#'\'dbuser\' => \'\''#'\'dbuser\' => \'\'$OWNCLOUD_DB_USER'#g" /var/www/owncloud/config/config.php
+sed -i "s#'\'dbpassword\' => \'\''#'\'dbpassword\' => \'\'$OWNCLOUD_DB_PASSWORD'#g" /var/www/owncloud/config/config.php
+
+sed -i "s#example.com#$DOMAIN_NAME#g" /var/www/owncloud/config/config.php
 
 echo "Setting up Apache Virtual Host for OwnCloud"
 
@@ -73,11 +74,11 @@ sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$DOMAIN_NAME" /etc/ap
 
 a2ensite $DOMAIN_OWNCLOUD.$DOMAIN_NAME
 
-service apache2 reload
-
 if [ CONNECTED_VOLUME = "yes" ]; then
   ./connectvolume
   ./moveowncloud
 fi
+
+service apache2 reload
 
 echo "Successfully installed and Set up OwnCloud!"
