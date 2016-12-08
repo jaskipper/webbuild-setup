@@ -1,8 +1,15 @@
 #!/bin/bash
 
 #Getting .env variables
-set -o allexport
-source ../wb.conf
+if [ ! $DOMAIN_NAME ]; then
+  PWDIR=${PWD##*/}
+  set -o allexport
+  if [ $PWDIR == "webbuild-setup" ]; then
+    source ./wb.conf
+  elif [ $PWDIR == "install-files" ]; then
+    source ../wb.conf
+  fi
+fi
 
 echo ""
 echo "#   Installing Latest OwnCloud and Dependencies    #"

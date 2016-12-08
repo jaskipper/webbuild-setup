@@ -5,8 +5,15 @@ echo "#                    Setting up SSL                 #"
 echo "#####################################################"
 
 #Getting .env variables
-set -o allexport
-source ../wb.conf
+if [ ! $DOMAIN_NAME ]; then
+  PWDIR=${PWD##*/}
+  set -o allexport
+  if [ $PWDIR == "webbuild-setup" ]; then
+    source ./wb.conf
+  elif [ $PWDIR == "install-files" ]; then
+    source ../wb.conf
+  fi
+fi
 
 apt --yes update
 apt --yes install python-letsencrypt-apache

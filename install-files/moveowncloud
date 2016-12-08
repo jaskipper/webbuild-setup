@@ -5,8 +5,15 @@ echo "#   Moving OwnCloud Files to Attached Volume    #"
 echo ""
 
 #Getting .env variables
-set -o allexport
-source ../wb.conf
+if [ ! $DOMAIN_NAME ]; then
+  PWDIR=${PWD##*/}
+  set -o allexport
+  if [ $PWDIR == "webbuild-setup" ]; then
+    source ./wb.conf
+  elif [ $PWDIR == "install-files" ]; then
+    source ../wb.conf
+  fi
+fi
 
 echo -e "Stopping Apache server to move your Owncloud Data"
 systemctl stop apache2
