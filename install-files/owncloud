@@ -74,7 +74,9 @@ sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$DOMAIN_NAME" /etc/ap
 
 a2ensite $DOMAIN_OWNCLOUD.$DOMAIN_NAME
 
-if [ CONNECTED_VOLUME = "yes" ]; then
+
+
+if [ $CONNECTED_VOLUME = "yes" ]; then
   ./connectvolume
   ./moveowncloud
 fi
