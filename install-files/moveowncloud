@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo ""
+echo "#   Moving OwnCloud Files to Attached Volume    #"
+echo ""
+
+echo -e "Stopping Apache server to move your Owncloud Data"
+sudo systemctl stop apache2
+
+echo -e "Moving your Data to /mnt/owncloud"
+sudo mv /var/www/owncloud/data /mnt/owncloud/
+
+echo -e "Changing your configuration..."
+sed -i "s#/var/www/owncloud/data#/mnt/owncloud/data#g" /var/www/owncloud/config/config.php
+
+echo -e "Starting Apache Server again"
+systemctl start apache2
+
+echo -e "I have successfully moved your data to the Volume!"

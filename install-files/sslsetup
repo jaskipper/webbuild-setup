@@ -4,6 +4,10 @@ echo "#####################################################"
 echo "#                    Setting up SSL                 #"
 echo "#####################################################"
 
+#Getting .env variables
+set -o allexport
+source ../wb.conf
+
 apt --yes update
 apt --yes install python-letsencrypt-apache
 

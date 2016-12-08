@@ -1,0 +1,94 @@
+#!/bin/bash
+
+echo ""
+echo "#   Setting up Your Attached Volume   #"
+echo ""
+
+#Getting .env variables
+set -o allexport
+source ../wb.conf
+
+# Getting the Volume_ID and Exporting it
+function myvolume {
+  VOLUMES_CONNECTED=$(ls /dev/disk/by-id/* -l | wc -l)
+  export VOLUMES_CONNECTED
+  # if ls /dev/disk/by-id/ | grep $VOLUME_NAME; then
+  if VOLUME_ID=$(find /dev/disk/by-id/*$VOLUME_NAME); then
+    export VOLUME_ID
+    echo -e "Your Volume_ID is $VOLUME_ID"
+  else
+    if ((VOLUMES_CONNECTED > 0)); then
+      echo -e "I wasn't able to find the volume that you specified in the .env file. Below you will see a list of volumes that are currently connected to your droplet."
+      echo -e "......................."
+      echo -e ""
+      for i in `ls /dev/disk/by-id | awk -F 'DO_Volume_' '{print $2}'`;
+      do
+        echo -e $i;
+      done;
+      echo -e ""
+      echo -e ".......................";
+      echo -e ""
+      findcorrectvolume
+    else
+      novolumes
+    fi
+  fi
+}
+
+function findcorrectvolume {
+  if ((VOLUMES_CONNECTED > 1)); then
+    echo -e "Are any of these the Volume that you set up in the Digital Ocean Dashboard?"
+    echo -e "Type [y] or [n] and then [enter]"
+    read -n 1 VOL_EXISTS
+    if [ $VOL_EXISTS = "y" ] || [ $VOL_EXISTS = "Y" ]; then
+      echo "Please type in the exact name of your Volume (The name IS Case Sensitive)"
+      read VOLUME_NAME
+      export VOLUME_NAME
+      myvolume
+    fi
+  else
+    echo -e "Is the above Volume your Volume? Please type [y] or [n] and then press [enter]"
+    read -n 1 IS_VOLUME
+    if [ $IS_VOLUME = "y" ] || [ $IS_VOLUME = "Y" ]; then
+      echo -e ""
+      echo -e "Great! Let's Attach that volume."
+      VOLUME_NAME=$(ls /dev/disk/by-id | awk -F 'DO_Volume_' '{print $2}')
+      export VOLUME_NAME
+      echo -e ""
+      myvolume
+    else
+      echo -e ""
+      novolumes
+    fi
+  fi
+}
+
+function novolumes {
+  echo -e "################################################################################################"
+  echo -e ""
+  echo -e "I'm Sorry. :'(  Your Volume is not connected to your Droplet at this time. After finishing this install, you can go to your Digital Ocean Dashboard, click on the Volumes Tab and add and/or attach your volume. Once you have done that, you may return here and run the \e[31mconnectvolume\e[0m command from the install-files folder."
+  echo -e "Below are the commands to run once you have connected your Droplet"
+  echo -e "......................."
+  echo -e "\e[31mssh root@yourdomain.com\e[0m"
+  echo -e "\e[31mcd install-files\e[0m"
+  echo -e "\e[31m./connectvolume\e[0m";
+  echo -e "......................."
+}
+
+myvolume
+
+if [ $VOLUME_ID ]; then
+
+  # Format the volume with ext4
+  sudo mkfs.ext4 -F $VOLUME_ID
+
+  # Create a mount point under /mnt
+  sudo mkdir -p /mnt/$VOLUME_NAME
+
+  # Mount the volume
+  sudo mount -o discard,defaults $VOLUME_ID /mnt/$VOLUME_NAME
+
+  # Change fstab so the volume will be mounted after a reboot
+  echo "$VOLUME_ID /mnt/$VOLUME_NAME ext4 defaults,nofail,discard 0 0 | sudo tee -a /etc/fstab"
+
+fi
