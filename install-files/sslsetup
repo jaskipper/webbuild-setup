@@ -16,6 +16,7 @@ if [ ! $DOMAIN_NAME ]; then
 fi
 
 apt --yes update
+echo -e "First let's install the LetsEncrypt Installer"
 apt --yes install python-letsencrypt-apache
 
 if ping -c 1 $DOMAIN_NAME &> /dev/null
