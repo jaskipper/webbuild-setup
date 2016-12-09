@@ -25,7 +25,7 @@ echo -e "Moving your Data to /mnt/owncloud"
 mv /var/www/owncloud/data /mnt/$VOLUME_NAME/owncloud/
 
 echo -e "Changing your configuration..."
-sed -i "s#/var/www/owncloud/data#/mnt/$VOLUME_NAME/owncloud/data#g" /var/www/owncloud/config/config.example.php
+sed -i "s#/var/www/owncloud/data#/mnt/$VOLUME_NAME/owncloud/data#g" /var/www/owncloud/config/config.sample.php
 
 echo -e "Starting Apache Server again"
 systemctl start apache2
