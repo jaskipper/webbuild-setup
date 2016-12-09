@@ -14,17 +14,31 @@ if [ ! $DOMAIN_NAME ]; then
   fi
 fi
 
-cd /var/www
 #Download Latest Stable release
-#curl -sOL "$(jq -r ".assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases/latest" ))"
-#Download Latest PR
-curl -sOL "$(jq -r ".[0] | .assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases" ))"
-crmzip=$(find -iname Church*.zip)
-unzip $crmzip
-rm $crmzip
-chown -R www-data:www-data churchcrm
-chmod -R 755 churchcrm
-find ./churchcrm/. -type f -exec chmod 644 {} +
+if (curl -sOL "$(jq -r ".assets[] | .browser_download_url" < <( curl -s "https://api.github.com/repos/churchCRM/CRM/releases/latest" ))"); then
+  echo "Downloaded Successfully!"
+  unzip Church*.zip
+  rm Church*.zip
+  chown -R www-data:www-data churchcrm
+  chmod -R 755 churchcrm
+  find ./churchcrm/. -type f -exec chmod 644 {} +
+  rm -R /var/www/churchcrm
+  mv churchcrm /var/www
+else
+  echo -e "ChurchCRM was \e[31mNOT\e[0m able to Download Successfully. I will go ahead and install all of the nessesary depencencies in order to allow it to run once it is installed successfully. You can try running this script again by changing directories into the 'install-files' directory and running '\e[31m./churchcrm\e[0m' If it continues to fail, you have several other options.
+
+  1) Go to the releases page at ChurchCRM's github account (https://github.com/ChurchCRM/CRM/releases) and get the download link to the latest release (Right click on the latest zip file and 'copy link'). Once this is install process is over, you can enter the following commands.
+\e[31m
+  cd /var/www
+  wget https://github.com/ChurchCRM/CRM/releases/download/2.4.2/ChurchCRM-2.4.2.zip (Or whatever the latest file link is)
+  unzip Church*.zip
+  chown -R www-data:www-data churchcrm
+  chmod -R 755 churchcrm
+  find ./churchcrm/. -type f -exec chmod 644 {} +
+\e[0m
+
+  2) You can also download the file directly to your computer and upload it through SFTP (Using an FTP Client like Filezilla). You want to make sure that you upload it to the /var/www folder."
+fi
 
 PKG_NAME=php7.0-mbstring
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $PKG_NAME|grep "install ok installed")
@@ -46,12 +60,24 @@ echo ""
 echo "#       Creating ChurchCRM User and Database        #"
 echo ""
 
-mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $CHURCHCRM_DATABASE;"
-echo "Database \"$CHURCHCRM_DATABASE\" created"
-mysql -uroot -e "CREATE USER IF NOT EXISTS '$CHURCHCRM_DB_USER'@'localhost' IDENTIFIED BY '$CHURCHCRM_DB_PASSWORD';"
-echo "User \"$CHURCHCRM_DB_USER\" created @localhost with password \"$CHURCHCRM_DB_PASSWORD\""
-mysql -uroot -e "GRANT ALL PRIVILEGES ON $CHURCHCRM_DATABASE.* TO '$CHURCHCRM_DB_USER'@'localhost';"
-echo "Granting all privileges on \"$CHURCHCRM_DATABASE\" to '$CHURCHCRM_DB_USER'@'localhost'"
+if (mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $CHURCHCRM_DATABASE;"); then
+  echo "Database \"$CHURCHCRM_DATABASE\" created"
+else
+  echo "There was a problem installing the Database \"$CHURCHCRM_DATABASE\""
+fi
+
+if (mysql -uroot -e "CREATE USER IF NOT EXISTS '$CHURCHCRM_DB_USER'@'localhost' IDENTIFIED BY '$CHURCHCRM_DB_PASSWORD';"); then
+  echo "User \"$CHURCHCRM_DB_USER\" created @localhost with password \"$CHURCHCRM_DB_PASSWORD\""
+else
+  echo "There was a problem adding the User \"$CHURCHCRM_DB_USER\""
+fi
+
+if (mysql -uroot -e "GRANT ALL PRIVILEGES ON $CHURCHCRM_DATABASE.* TO '$CHURCHCRM_DB_USER'@'localhost';"); then
+  echo "Granting all privileges on \"$CHURCHCRM_DATABASE\" to '$CHURCHCRM_DB_USER'@'localhost'"
+else
+  echo "There was a problem granting privileges on the Database \"$CHURCHCRM_DATABASE\" to '$CHURCHCRM_DB_USER'@'localhost'"
+fi
+
 mysql -uroot -e "FLUSH PRIVILEGES;"
 
 echo "Finished ChurchCRM Database setup successfully"
