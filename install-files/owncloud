@@ -85,11 +85,11 @@ if [ $CONNECTED_VOLUME = "yes" ]; then
   PWDIR=${PWD##*/}
   set -o allexport
   if [ $PWDIR == "webbuild-setup" ]; then
+    ./install-files/connectvolume
+    ./install-files/moveowncloud
+  elif [ $PWDIR == "install-files" ]; then
     ./connectvolume
     ./moveowncloud
-  elif [ $PWDIR == "install-files" ]; then
-    ../connectvolume
-    ../moveowncloud
   fi
 fi
 

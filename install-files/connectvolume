@@ -96,6 +96,6 @@ if [ $VOLUME_ID ]; then
   sudo mount -o discard,defaults $VOLUME_ID /mnt/$VOLUME_NAME
 
   # Change fstab so the volume will be mounted after a reboot
-  echo "$VOLUME_ID /mnt/$VOLUME_NAME ext4 defaults,nofail,discard 0 0 | sudo tee -a /etc/fstab"
+  echo "$VOLUME_ID /mnt/$VOLUME_NAME ext4 defaults,nofail,discard 0 0 | sudo tee -a" >> /etc/fstab
 
 fi

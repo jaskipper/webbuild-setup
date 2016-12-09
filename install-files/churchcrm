@@ -80,6 +80,10 @@ fi
 
 mysql -uroot -e "FLUSH PRIVILEGES;"
 
+echo "[mysqld]" >> /etc/mysql/conf.d/disable_strict_mode.cnf
+echo "sql_mode=IGNORE_SPACE,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION" >> /etc/mysql/conf.d/disable_strict_mode.cnf
+service mysql restart
+
 echo "Finished ChurchCRM Database setup successfully"
 
 echo "Setting up ChurchCRM Config file"

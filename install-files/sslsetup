@@ -60,4 +60,13 @@ letsencrypt --apache $DOMAIN_NAME_ENCRYPT $DOMAIN_WWW_ENCRYPT $DOMAIN_CHURCHCRM_
 echo "30 2 * * 1 /usr/local/sbin/certbot-auto renew >> /var/log/le-renew.log" >> /var/spool/cron/crontabs/root
 chmod 600 /var/spool/cron/crontabs/root
 
+sed -i "/<\/Directory>/a <IfModule mod_headers.c>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
+# apache doesn't seem to notice this... So I'm Changing it.
+sed -i "/#### DO NOT CHANGE ANYTHING ABOVE THIS LINE ####/a <IfModule mod_headers.c>" /var/www/owncloud/.htaccess
+sed -i "/<IfModule mod_headers.c>/a Header always set Strict-Transport-Security \"max-age=15552000; includeSubDomains\"" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
+sed -i "/<IfModule mod_headers.c>/a Header always set Strict-Transport-Security \"max-age=15552000; includeSubDomains\"" /var/www/owncloud/.htaccess
+sed -i "/max-age=15552000;/a <\/IfModule>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
+sed -i "/max-age=15552000;/a <\/IfModule>" /var/www/owncloud/.htaccess
+
+
 service apache2 reload
