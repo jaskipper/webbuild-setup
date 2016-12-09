@@ -18,6 +18,9 @@ fi
 echo -e "Stopping Apache server to move your Owncloud Data"
 systemctl stop apache2
 
+VOLUME_NAME=$(ls /dev/disk/by-id | awk -F 'DO_Volume_' '{print $2}')
+export VOLUME_NAME
+
 echo -e "Moving your Data to /mnt/owncloud"
 mv /var/www/owncloud/data /mnt/$VOLUME_NAME/owncloud/
 

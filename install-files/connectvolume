@@ -61,6 +61,7 @@ function findcorrectvolume {
       echo -e "Great! Let's Attach that volume."
       VOLUME_NAME=$(ls /dev/disk/by-id | awk -F 'DO_Volume_' '{print $2}')
       export VOLUME_NAME
+      echo "VOLUME_NAME=$VOLUME_NAME" >> $HOME/.bashrc
       echo -e ""
       myvolume
     else
