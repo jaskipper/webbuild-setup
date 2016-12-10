@@ -1,0 +1,63 @@
+#!/bin/bash
+# This is to download and install the latest mp-stacks plugins needed for this project
+
+#Getting .env variables
+if [ ! $DOMAIN_NAME ]; then
+  PWDIR=${PWD##*/}
+  set -o allexport
+  if [ $PWDIR == "webbuild-setup" ]; then
+    source ./wb.conf
+  elif [ $PWDIR == "install-files" ]; then
+    source ../wb.conf
+  fi
+fi
+
+PLUGINDIR="/var/www/html/wp-content/plugins"
+
+MPPLUGINS="mp-buttons
+mp-core
+mp-events
+mp-menu
+mp-stacks
+mp-stacks-animation
+mp-stacks-eventgrid
+mp-stacks-forms
+mp-stacks-gallery
+mp-stacks-googlefonts
+mp-stacks-googlemaps
+mp-stacks-icons
+mp-stacks-iframe
+mp-stacks-image-style
+mp-stacks-linkgrid
+mp-stacks-mailchimp
+mp-stacks-navigation
+mp-stacks-parallax
+mp-stacks-postgrid
+mp-stacks-second-text
+mp-stacks-second-video
+mp-stacks-sermongrid
+mp-stacks-shadows
+mp-stacks-sociallinks
+mp-stacks-video-backgrounds
+mp-stacks-widgets"
+
+# Get a list of plugins already installed
+MPPLUGINSINSTALLED=$(ls /var/www/html/wp-content/plugins | grep ^mp-)
+# Combine the two arrays and take out duplicates
+MPFINALLIST=$(echo "$MPPLUGINS $MPPLUGINSINSTALLED" | sort -u )
+
+for i in $MPFINALLIST; do
+  if [ -d $PLUGINDIR/$i ]; then
+    rm -R $PLUGINDIR/$i
+    echo -e "----------------------------"
+    echo -e "Updating the $i plugin"
+    echo -e "----------------------------"
+    wait
+  else
+    echo -e "----------------------------"
+    echo -e "Installing the $i plugin"
+    echo -e "----------------------------"
+  fi
+  git clone https://github.com/mintplugins/$i.git $PLUGINDIR/$i
+  chown -R www-data:www-data $PLUGINDIR/$i
+done

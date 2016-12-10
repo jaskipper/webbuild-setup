@@ -28,6 +28,7 @@ apt --yes install unzip jq
 echo "Wordpress Plugins & Themes Setup"
 echo ""
 
+timedatectl set-timezone $TIMEZONE
 #cd /var/www/html/wp-content/plugins
 
 #wget https://skipperinnovations.com/app/uploads/2016/11/webbuildplugins.zip
@@ -61,6 +62,9 @@ sed -i "/ServerName/a ServerAlias www.$DOMAIN_NAME" /etc/apache2/sites-available
 a2ensite $DOMAIN_NAME
 
 service apache2 reload
+
+echo "Installing Essential Wordpress Plugins"
+$DIR/install-files/mpstacks
 
 if [ $CHURCHCRM_INSTALL = "yes" ];
 then
