@@ -36,7 +36,7 @@ chmod 600 /root/.my.cnf
 
 $DIR/install-files/wordpress
 echo "Installing Essential Wordpress Plugins"
-$DIR/install-files/mbplugins
+$DIR/install-files/wbplugins
 
 if [ $CHURCHCRM_INSTALL = "yes" ];
 then

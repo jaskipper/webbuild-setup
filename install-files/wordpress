@@ -60,7 +60,7 @@ fi
 
 #Adding Username and Password to MySQL
 if (mysql -uroot -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_USER';"); then
-  echo "User \"$DB_USER\" created @localhost with password \"$DB_USER\""
+  echo "User \"$DB_USER\" created @localhost with password \"$DB_PASSWORD\""
 else
   echo "There was a problem adding the User \"$DB_USER\""
 fi
@@ -81,6 +81,7 @@ sed -i "s/DB_PASSWORD=database_password/DB_PASSWORD=$DB_PASSWORD/g" /var/www/htm
 sed -i "s/DB_HOST=database_host/DB_NAME=localhost/g" /var/www/html/.env
 sed -i "s/WP_ENV=development/WP_ENV=production/g" /var/www/html/.env
 sed -i "s/WP_HOME=http:\/\/example.com/WP_HOME=http:\/\/$DOMAIN_NAME" /var/www/html/.env
+sed -i "s/'DISALLOW_FILE_MODS', true/'DISALLOW_FILE_MODS', false/g" /var/www/html/config/environments/production.php
 
 WPSALTS="AUTH_KEY='generateme'
 SECURE_AUTH_KEY='generateme'
@@ -93,7 +94,7 @@ NONCE_SALT='generateme'"
 
 for i in $WPSALTS; do
   GEN=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-64})
-  SALT=$(echo "$i" | sed "s/generateme//g" | sed "s/''/'$GEN'/g")
+  SALT=$(echo "$i" | sed "s/generateme//g" | sed "s/''/\"$GEN\"/g")
   sed -i "s/$i/$SALT/g" /var/www/html/.env
 done
 
