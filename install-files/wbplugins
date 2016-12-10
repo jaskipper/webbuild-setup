@@ -1,7 +1,7 @@
 #!/bin/bash
 # This is to download and install the latest mp-stacks plugins needed for this project
 
-PLUGINDIR="/var/www/html/wp-content/plugins"
+PLUGINDIR="/var/www/html/web/app/plugins"
 
 MPPLUGINS="mp-buttons
 mp-core

@@ -1,0 +1,116 @@
+#!/bin/bash
+
+#Getting .env variables
+if [ ! $DOMAIN_NAME ]; then
+  PWDIR=${PWD##*/}
+  set -o allexport
+  if [ $PWDIR == "webbuild-setup" ]; then
+    source ./wb.conf
+  elif [ $PWDIR == "install-files" ]; then
+    source ../wb.conf
+  fi
+fi
+
+apt -y install composer php7.0-xml php7.0-zip
+rm -R /var/www/html
+composer create-project roots/bedrock /var/www/html
+chown -R www-data:www-data /var/www/html
+cp /var/www/html/.env.example /var/www/html/.env
+
+# Getting or Setting ChurchCRM Database Name
+if grep -q DB_NAME /root/.digitalocean_password; then
+  echo -e "It looks like you have already set up your database in MySQL. Getting that info now..."
+  DB_NAME=$(grep DB_NAME /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_NAME=##g')
+else
+  echo -e "Setting new ChurchCRM Database User and Password in MySQL"
+  DB_NAME=bedrock
+  echo "DB_NAME=$DB_NAME" >> /root/.digitalocean_password
+fi
+export DB_NAME
+
+# Getting or Setting ChurchCRM Database User
+if grep -q DB_USER /root/.digitalocean_password; then
+  DB_USER=$(grep DB_USER /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_USER=##g')
+else
+  DB_USER=bedrock
+  echo "DB_USER=$DB_USER" >> /root/.digitalocean_password
+fi
+export DB_USER
+
+# Getting or Setting ChurchCRM Database Random Password
+if grep -q DB_PASSWORD /root/.digitalocean_password; then
+  DB_PASSWORD=$(grep DB_USER /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_USER=##g')
+else
+  DB_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
+  echo "DB_PASSWORD=$DB_PASSWORD" >> /root/.digitalocean_password
+fi
+export DB_PASSWORD
+
+echo -e "--------------------"
+echo -e "You can find your ChurchCRM Database Username and Password in /root/.digitalocean_password"
+echo -e "--------------------"
+
+
+# Adding Database to MySQL
+if (mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"); then
+  echo "Database \"$DB_NAME\" created"
+else
+  echo "There was a problem installing the Database \"$DB_NAME\""
+fi
+
+#Adding Username and Password to MySQL
+if (mysql -uroot -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_USER';"); then
+  echo "User \"$DB_USER\" created @localhost with password \"$DB_USER\""
+else
+  echo "There was a problem adding the User \"$DB_USER\""
+fi
+
+if (mysql -uroot -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"); then
+  echo "Granting all privileges on \"$DB_NAME\" to '$DB_USER'@'localhost'"
+else
+  echo "There was a problem granting privileges on the Database \"$DB_NAME\" to '$DB_USER'@'localhost'"
+fi
+
+mysql -uroot -e "FLUSH PRIVILEGES;"
+
+# Database Settings for bedrock
+
+sed -i "s/DB_NAME=database_name/DB_NAME=$DB_NAME/g" /var/www/html/.env
+sed -i "s/DB_USER=database_user/DB_USER=$DB_USER/g" /var/www/html/.env
+sed -i "s/DB_PASSWORD=database_password/DB_PASSWORD=$DB_PASSWORD/g" /var/www/html/.env
+sed -i "s/DB_HOST=database_host/DB_NAME=localhost/g" /var/www/html/.env
+sed -i "s/WP_ENV=development/WP_ENV=production/g" /var/www/html/.env
+sed -i "s/WP_HOME=http:\/\/example.com/WP_HOME=http:\/\/$DOMAIN_NAME" /var/www/html/.env
+
+WPSALTS="AUTH_KEY='generateme'
+SECURE_AUTH_KEY='generateme'
+LOGGED_IN_KEY='generateme'
+NONCE_KEY='generateme'
+AUTH_SALT='generateme'
+SECURE_AUTH_SALT='generateme'
+LOGGED_IN_SALT='generateme'
+NONCE_SALT='generateme'"
+
+for i in $WPSALTS; do
+  GEN=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-64})
+  SALT=$(echo "$i" | sed "s/generateme//g" | sed "s/''/'$GEN'/g")
+  sed -i "s/$i/$SALT/g" /var/www/html/.env
+done
+
+echo "Setting up Apache Virtual Host for Wordpress"
+
+#Just making sure that they didn't put www before the domain name.
+DOMAIN_NAME=$(sed 's/www.//g' <<<"$DOMAIN_NAME")
+
+cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_NAME.conf
+
+sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "s#/var/www/html#/var/www/html/web#g" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "/ServerAdmin/a         ServerName $DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+sed -i "/ServerName/a ServerAlias www.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_NAME.conf
+
+a2ensite $DOMAIN_NAME
+
+service apache2 reload
+
+echo "Successfully installed and Set up Wordpress!"
