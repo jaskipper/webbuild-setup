@@ -34,12 +34,18 @@ echo "Wordpress Plugins & Themes Setup"
 echo ""
 
 # Adding an autoupdater to .bashrc
-if ! grep -q WBUPDATE /root/.bashrc; then
-  echo "Not been installed before"
-else
-  echo "Been installed"
-  WBUPDATE
+if ! grep -q "wbupdate" /root/.bashrc; then
+  echo "function wbupdate {
+    rm -R ~/webbuild-setup
+    git clone https://github.com/jaskipper/webbuild-setup.git
+  }
+  function pluginsupdate {
+    /root/webbuild-setup/install-files/skipperplugins
+  }" >> /root/.bashrc
+  source .bashrc
 fi
+
+
 
 # Setting correct server Timezone
 echo -e "Updating Server Time Zone"
