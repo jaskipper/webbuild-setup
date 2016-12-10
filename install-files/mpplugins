@@ -50,21 +50,3 @@ for i in $MPFINALLIST; do
   git clone https://github.com/mintplugins/$i.git $PLUGINDIR/$i
   chown -R www-data:www-data $PLUGINDIR/$i
 done
-
-SKIPPER_PLUGINS="skipper-addons"
-
-for i in $SKIPPER_PLUGINS; do
-  if [ -d $PLUGINDIR/$i ]; then
-    rm -R $PLUGINDIR/$i
-    echo -e "----------------------------"
-    echo -e "Updating the $i plugin"
-    echo -e "----------------------------"
-    wait
-  else
-    echo -e "----------------------------"
-    echo -e "Installing the $i plugin"
-    echo -e "----------------------------"
-  fi
-  git clone https://github.com/jaskipper/$i.git $PLUGINDIR/$i
-  chown -R www-data:www-data $PLUGINDIR/$i
-done

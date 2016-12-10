@@ -11,13 +11,17 @@ if [ ! $DOMAIN_NAME ]; then
   fi
 fi
 
+echo ""
+echo "#   Installing Latest Wordpress and Dependencies    #"
+echo ""
+
 apt -y install composer php7.0-xml php7.0-zip
 rm -R /var/www/html
 composer create-project roots/bedrock /var/www/html
 chown -R www-data:www-data /var/www/html
 cp /var/www/html/.env.example /var/www/html/.env
 
-# Getting or Setting ChurchCRM Database Name
+# Getting or Setting Wordpress Database Name
 if grep -q DB_NAME /root/.digitalocean_password; then
   echo -e "It looks like you have already set up your database in MySQL. Getting that info now..."
   DB_NAME=$(grep DB_NAME /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_NAME=##g')
@@ -28,7 +32,7 @@ else
 fi
 export DB_NAME
 
-# Getting or Setting ChurchCRM Database User
+# Getting or Setting Wordpress Database User
 if grep -q DB_USER /root/.digitalocean_password; then
   DB_USER=$(grep DB_USER /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_USER=##g')
 else
@@ -37,7 +41,7 @@ else
 fi
 export DB_USER
 
-# Getting or Setting ChurchCRM Database Random Password
+# Getting or Setting Wordpress Database Random Password
 if grep -q DB_PASSWORD /root/.digitalocean_password; then
   DB_PASSWORD=$(grep DB_USER /root/.digitalocean_password | sed 's#"##g' | sed 's#DB_USER=##g')
 else

@@ -3,13 +3,6 @@
 #Get Current run directory directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 EXPORT DIR
-#Get MySQL Root Password and put it in a variable
-rootdbpassword=$(grep root_mysql /root/.digitalocean_password | sed 's#"##g' | sed 's#root_mysql_pass=##g')
-
-echo "Removing Root MySQL Configuration file"
-if [ -f /root/.my.cnf ]; then
-  rm /root/.my.cnf
-fi
 
 #Getting .env variables
 echo "Setting variables from wb.conf file"
@@ -21,10 +14,13 @@ DEBIAN_FRONTEND=noninteractive apt
 apt --yes update
 apt --yes install unzip jq
 
-echo "Wordpress Plugins & Themes Setup"
-echo ""
+#Get MySQL Root Password and put it in a variable
+rootdbpassword=$(grep root_mysql /root/.digitalocean_password | sed 's#"##g' | sed 's#root_mysql_pass=##g')
 
-timedatectl set-timezone $TIMEZONE
+echo "Removing Root MySQL Configuration file"
+if [ -f /root/.my.cnf ]; then
+  rm /root/.my.cnf
+fi
 
 echo "Creating New Root MySQL Configuration file"
 echo "[client]" >> /root/.my.cnf
@@ -34,9 +30,25 @@ echo "password=$rootdbpassword" >> /root/.my.cnf
 echo "Changing Permissions on Root MySQL Configuration file"
 chmod 600 /root/.my.cnf
 
+echo "Wordpress Plugins & Themes Setup"
+echo ""
+
+# Adding an autoupdater to .bashrc
+if ! grep -q WBUPDATE /root/.bashrc; then
+  echo "Not been installed before"
+else
+  echo "Been installed"
+  WBUPDATE
+fi
+
+# Setting correct server Timezone
+echo -e "Updating Server Time Zone"
+timedatectl set-timezone $TIMEZONE
+
 $DIR/install-files/wordpress
 echo "Installing Essential Wordpress Plugins"
-$DIR/install-files/wbplugins
+$DIR/install-files/skipperplugins
+$DIR/install-files/mpplugins
 
 if [ $CHURCHCRM_INSTALL = "yes" ];
 then
