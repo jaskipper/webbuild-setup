@@ -50,6 +50,40 @@ echo ""
 echo "#       Creating OWNCLOUD User and Database        #"
 echo ""
 
+# Getting or Setting OwnCloud Database Name
+if grep -q OWNCLOUD_DATABASE /root/.digitalocean_password; then
+  echo -e "It looks like you have already set up your database in MySQL. Getting that info now..."
+  OWNCLOUD_DATABASE=$(grep OWNCLOUD_DATABASE /root/.digitalocean_password | sed 's#"##g' | sed 's#OWNCLOUD_DATABASE=##g')
+else
+  echo -e "Setting new OwnCloud Database User and Password in MySQL"
+  OWNCLOUD_DATABASE=owncloud
+  echo "OWNCLOUD_DATABASE=$OWNCLOUD_DATABASE" >> /root/.digitalocean_password
+fi
+export OWNCLOUD_DATABASE
+
+# Getting or Setting  OWNCLOUD Database User
+if grep -q OWNCLOUD_DB_USER /root/.digitalocean_password; then
+  OWNCLOUD_DB_USER=$(grep OWNCLOUD_DB_USER /root/.digitalocean_password | sed 's#"##g' | sed 's#OWNCLOUD_DB_USER=##g')
+else
+  OWNCLOUD_DB_USER=owncloud
+  echo "OWNCLOUD_DB_USER=$OWNCLOUD_DB_USER" >> /root/.digitalocean_password
+fi
+export OWNCLOUD_DB_USER
+
+# Getting or Setting OWNCLOUD Database Random Password
+if grep -q OWNCLOUD_DB_PASSWORD /root/.digitalocean_password; then
+  OWNCLOUD_DB_PASSWORD=$(grep OWNCLOUD_DB_PASSWORD /root/.digitalocean_password | sed 's#"##g' | sed 's#OWNCLOUD_DB_PASSWORD=##g')
+else
+  OWNCLOUD_DB_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
+  echo "OWNCLOUD_DB_PASSWORD=$OWNCLOUD_DB_PASSWORD" >> /root/.digitalocean_password
+fi
+export OWNCLOUD_DB_PASSWORD
+
+echo -e "--------------------"
+echo -e "You can find your OwnCloud Database Username and Password in /root/.digitalocean_password"
+echo -e "--------------------"
+
+
 mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $OWNCLOUD_DATABASE;"
 echo "Database \"$OWNCLOUD_DATABASE\" created"
 mysql -uroot -e "CREATE USER IF NOT EXISTS '$OWNCLOUD_DB_USER'@'localhost' IDENTIFIED BY '$OWNCLOUD_DB_PASSWORD';"

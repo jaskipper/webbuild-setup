@@ -17,10 +17,6 @@ echo ""
 set -o allexport
 source $DIR/wb.conf
 
-echo "Adding Digital Ocean Non Root User"
-useradd -m -p $DO_USER_PW -s /bin/bash $DO_USERNAME
-gpasswd -a $DO_USERNAME sudo
-
 DEBIAN_FRONTEND=noninteractive apt
 apt --yes update
 apt --yes install unzip jq
@@ -29,15 +25,6 @@ echo "Wordpress Plugins & Themes Setup"
 echo ""
 
 timedatectl set-timezone $TIMEZONE
-#cd /var/www/html/wp-content/plugins
-
-#wget https://skipperinnovations.com/app/uploads/2016/11/webbuildplugins.zip
-#unzip webbuildplugins.zip
-#chown -R www-data:www-data webbuildplugins
-#chmod -R 755 webbuildplugins
-#find ./webbuildplugins/. -type f -exec chmod 644 {} +
-#mv webbuildplugins/. .
-#rm webbuildplugins.zip
 
 echo "Creating New Root MySQL Configuration file"
 echo "[client]" >> /root/.my.cnf
