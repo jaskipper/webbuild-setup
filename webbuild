@@ -45,8 +45,6 @@ if ! grep -q "wbupdate" /root/.bashrc; then
   source .bashrc
 fi
 
-
-
 # Setting correct server Timezone
 echo -e "Updating Server Time Zone"
 timedatectl set-timezone $TIMEZONE

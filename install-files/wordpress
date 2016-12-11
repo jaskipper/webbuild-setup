@@ -54,7 +54,6 @@ echo -e "--------------------"
 echo -e "You can find your ChurchCRM Database Username and Password in /root/.digitalocean_password"
 echo -e "--------------------"
 
-
 # Adding Database to MySQL
 if (mysql -uroot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"); then
   echo "Database \"$DB_NAME\" created"
@@ -63,7 +62,7 @@ else
 fi
 
 #Adding Username and Password to MySQL
-if (mysql -uroot -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_USER';"); then
+if (mysql -uroot -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"); then
   echo "User \"$DB_USER\" created @localhost with password \"$DB_PASSWORD\""
 else
   echo "There was a problem adding the User \"$DB_USER\""
@@ -84,7 +83,7 @@ sed -i "s/DB_USER=database_user/DB_USER=$DB_USER/g" /var/www/html/.env
 sed -i "s/DB_PASSWORD=database_password/DB_PASSWORD=$DB_PASSWORD/g" /var/www/html/.env
 sed -i "s/DB_HOST=database_host/DB_NAME=localhost/g" /var/www/html/.env
 sed -i "s/WP_ENV=development/WP_ENV=production/g" /var/www/html/.env
-sed -i "s/WP_HOME=http:\/\/example.com/WP_HOME=http:\/\/$DOMAIN_NAME" /var/www/html/.env
+sed -i "s#WP_HOME=http://example.com#WP_HOME=$DOMAIN_NAME#g" /var/www/html/.env
 sed -i "s/'DISALLOW_FILE_MODS', true/'DISALLOW_FILE_MODS', false/g" /var/www/html/config/environments/production.php
 
 WPSALTS="AUTH_KEY='generateme'
