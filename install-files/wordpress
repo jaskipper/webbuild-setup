@@ -83,7 +83,7 @@ sed -i "s/DB_USER=database_user/DB_USER=$DB_USER/g" /var/www/html/.env
 sed -i "s/DB_PASSWORD=database_password/DB_PASSWORD=$DB_PASSWORD/g" /var/www/html/.env
 sed -i "s/DB_HOST=database_host/DB_NAME=localhost/g" /var/www/html/.env
 sed -i "s/WP_ENV=development/WP_ENV=production/g" /var/www/html/.env
-sed -i "s#WP_HOME=http://example.com#WP_HOME=$DOMAIN_NAME#g" /var/www/html/.env
+sed -i "s#WP_HOME=http://example.com#WP_HOME=https://$DOMAIN_NAME#g" /var/www/html/.env
 sed -i "s/'DISALLOW_FILE_MODS', true/'DISALLOW_FILE_MODS', false/g" /var/www/html/config/environments/production.php
 
 WPSALTS="AUTH_KEY='generateme'
