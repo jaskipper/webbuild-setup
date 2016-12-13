@@ -85,6 +85,11 @@ sed -i "s/DB_HOST=database_host/DB_NAME=localhost/g" /var/www/html/.env
 sed -i "s/WP_ENV=development/WP_ENV=production/g" /var/www/html/.env
 sed -i "s#WP_HOME=http://example.com#WP_HOME=https://$DOMAIN_NAME#g" /var/www/html/.env
 sed -i "s/'DISALLOW_FILE_MODS', true/'DISALLOW_FILE_MODS', false/g" /var/www/html/config/environments/production.php
+sed -i "s/post_max_size\ =\ 8M/post_max_size\ =\ 30M/g" /etc/php/7.0/apache2/php.ini
+sed -i "s/upload_max_filesize\ =\ 2M/upload_max_filesize\ =\ 30M/g" /etc/php/7.0/apache2/php.ini
+sed -i "s/memory_limit\ =\ 128M/memory_limit\ =\ 256M/g" /etc/php/7.0/apache2/php.ini
+sed -i "s/max_execution_time\ =\ 30/max_execution_time\ =\ 60/g" /etc/php/7.0/apache2/php.ini
+
 
 WPSALTS="AUTH_KEY='generateme'
 SECURE_AUTH_KEY='generateme'
