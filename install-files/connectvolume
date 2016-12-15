@@ -91,12 +91,12 @@ if [ $VOLUME_ID ]; then
   sudo mkfs.ext4 -F $VOLUME_ID
 
   # Create a mount point under /mnt
-  sudo mkdir -p /mnt/$VOLUME_NAME
+  sudo mkdir -p /mnt/wbvolume/
 
   # Mount the volume
-  sudo mount -o discard,defaults $VOLUME_ID /mnt/$VOLUME_NAME
+  sudo mount -o discard,defaults $VOLUME_ID /mnt/wbvolume
 
   # Change fstab so the volume will be mounted after a reboot
-  echo "$VOLUME_ID /mnt/$VOLUME_NAME ext4 defaults,nofail,discard 0 0 | sudo tee -a" >> /etc/fstab
+  echo "$VOLUME_ID /mnt/wbvolume ext4 defaults,nofail,discard 0 0 | sudo tee -a" >> /etc/fstab
 
 fi
