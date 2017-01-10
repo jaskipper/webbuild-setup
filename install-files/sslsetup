@@ -57,7 +57,7 @@ fi
 
 letsencrypt --apache $DOMAIN_NAME_ENCRYPT $DOMAIN_WWW_ENCRYPT $DOMAIN_CHURCHCRM_ENCRYPT $DOMAIN_OWNCLOUD_ENCRYPT
 
-echo "30 2 * * 1 /usr/local/sbin/certbot-auto renew >> /var/log/le-renew.log" >> /var/spool/cron/crontabs/root
+echo "30 2 * * 1 /usr/bin/letsencrypt renew >> /var/log/le-renew.log" >> /var/spool/cron/crontabs/root
 chmod 600 /var/spool/cron/crontabs/root
 
 sed -i "/<\/Directory>/a <IfModule mod_headers.c>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
