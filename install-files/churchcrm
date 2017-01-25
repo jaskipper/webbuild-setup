@@ -138,6 +138,7 @@ sed -i "s/||DB_USER||/$CHURCHCRM_DB_USER/g" /var/www/churchcrm/Include/Config.ph
 sed -i "s/||DB_PASSWORD||/$CHURCHCRM_DB_PASSWORD/g" /var/www/churchcrm/Include/Config.php
 sed -i "s/||URL||//g" /var/www/churchcrm/Include/Config.php
 sed -i "s/||ROOT_PATH||//g" /var/www/churchcrm/Include/Config.php
+chown -R www-data:www-data /var/www/churchcrm/Include/Config.php
 
 echo "Setting up Apache Virtual Host for ChurchCRM"
 
