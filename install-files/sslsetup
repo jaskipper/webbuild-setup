@@ -29,13 +29,20 @@ then
   DOMAIN_WWW_ENCRYPT="-d www.$DOMAIN_NAME"
 fi
 
+# CHANGING THIS AROUND SO THAT IF WP IS A SUBDOMAIN, WE WILL MAKE CHURCHCRM AND OWNCLOUD SUBDOMAINS OF THE TOP DOMAIN
+if [ $WP_SUBDOMAIN = "yes" ]; then
+  TOP_DOMAIN = ${DOMAIN_NAME#*.};
+else
+  TOP_DOMAIN = $DOMAIN_NAME;
+fi
+
 if [ $CHURCHCRM_INSTALL=yes ]
 then
-  if ping -c 1 $DOMAIN_CHURCHCRM.$DOMAIN_NAME &> /dev/null
+  if ping -c 1 $DOMAIN_CHURCHCRM.$TOP_DOMAIN &> /dev/null
   then
-    DOMAIN_CHURCHCRM_ENCRYPT="-d $DOMAIN_CHURCHCRM.$DOMAIN_NAME"
+    DOMAIN_CHURCHCRM_ENCRYPT="-d $DOMAIN_CHURCHCRM.$TOP_DOMAIN"
   else
-    echo "COULD NOT CONNECT TO $DOMAIN_CHURCHCRM.$DOMAIN_NAME. Stopping install of SSL Certificates."
+    echo "COULD NOT CONNECT TO $DOMAIN_CHURCHCRM.$TOP_DOMAIN. Stopping install of SSL Certificates."
     echo "Be sure to have your Networking settings in Digital Ocean set up right and then re-run the"
     echo "sslsetup script like this while in the project folder: ./sslsetup"
     SSLHALT=1
@@ -44,11 +51,11 @@ fi
 
 if [ $OWNCLOUD_INSTALL=yes ]
 then
-  if ping -c 1 $DOMAIN_OWNCLOUD.$DOMAIN_NAME &> /dev/null
+  if ping -c 1 $DOMAIN_OWNCLOUD.$TOP_DOMAIN &> /dev/null
   then
-    DOMAIN_OWNCLOUD_ENCRYPT="-d $DOMAIN_OWNCLOUD.$DOMAIN_NAME"
+    DOMAIN_OWNCLOUD_ENCRYPT="-d $DOMAIN_OWNCLOUD.$TOP_DOMAIN"
   else
-    echo "COULD NOT CONNECT TO $DOMAIN_OWNCLOUD.$DOMAIN_NAME. Stopping install of SSL Certificates."
+    echo "COULD NOT CONNECT TO $DOMAIN_OWNCLOUD.$TOP_DOMAIN. Stopping install of SSL Certificates."
     echo "Be sure to have your Networking settings in Digital Ocean set up right and then re-run the"
     echo "sslsetup script like this while in the project folder: ./sslsetup"
     SSLHALT=1
@@ -60,9 +67,9 @@ letsencrypt --apache $DOMAIN_NAME_ENCRYPT $DOMAIN_WWW_ENCRYPT $DOMAIN_CHURCHCRM_
 echo "30 2 * * 1 /usr/bin/letsencrypt renew >> /var/log/le-renew.log" >> /var/spool/cron/crontabs/root
 chmod 600 /var/spool/cron/crontabs/root
 
-sed -i "/<\/Directory>/a <IfModule mod_headers.c>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
-sed -i "/<IfModule mod_headers.c>/a Header always set Strict-Transport-Security \"max-age=15552000; includeSubDomains\"" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
-sed -i "/max-age=15552000;/a <\/IfModule>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME-le-ssl.conf
+sed -i "/<\/Directory>/a <IfModule mod_headers.c>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN-le-ssl.conf
+sed -i "/<IfModule mod_headers.c>/a Header always set Strict-Transport-Security \"max-age=15552000; includeSubDomains\"" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN-le-ssl.conf
+sed -i "/max-age=15552000;/a <\/IfModule>" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN-le-ssl.conf
 
 
 service apache2 reload

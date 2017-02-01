@@ -107,13 +107,21 @@ sed -i "s#'dbpassword' => '',#'dbpassword' => '$OWNCLOUD_DB_PASSWORD',#g" /var/w
 
 echo "Setting up Apache Virtual Host for OwnCloud"
 
-cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+# CHANGING THIS AROUND SO THAT IF WP IS A SUBDOMAIN, WE WILL MAKE CHURCHCRM AND OWNCLOUD SUBDOMAINS OF THE TOP DOMAIN
+if [ $WP_SUBDOMAIN = "yes" ]; then
+  TOP_DOMAIN = ${DOMAIN_NAME#*.};
+else
+  TOP_DOMAIN = $DOMAIN_NAME;
+fi
 
-sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
-sed -i "s#/var/www/html#/var/www/owncloud#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
-sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$DOMAIN_NAME" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$DOMAIN_NAME.conf
+cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
 
-a2ensite $DOMAIN_OWNCLOUD.$DOMAIN_NAME
+sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
+sed -i "s#/var/www/html#/var/www/churchcrm#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
+sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$TOP_DOMAIN" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
+
+a2ensite $DOMAIN_OWNCLOUD.$TOP_DOMAIN
+
 a2enmod headers
 
 if [ $CONNECTED_VOLUME = "yes" ]; then
