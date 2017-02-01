@@ -109,9 +109,9 @@ echo "Setting up Apache Virtual Host for OwnCloud"
 
 # CHANGING THIS AROUND SO THAT IF WP IS A SUBDOMAIN, WE WILL MAKE CHURCHCRM AND OWNCLOUD SUBDOMAINS OF THE TOP DOMAIN
 if [ $WP_SUBDOMAIN = "yes" ]; then
-  TOP_DOMAIN = ${DOMAIN_NAME#*.};
+  TOP_DOMAIN=${DOMAIN_NAME#*.};
 else
-  TOP_DOMAIN = $DOMAIN_NAME;
+  TOP_DOMAIN=$DOMAIN_NAME;
 fi
 
 cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
