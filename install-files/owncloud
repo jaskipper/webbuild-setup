@@ -117,7 +117,7 @@ fi
 cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
 
 sed -i "s/webmaster@localhost/$USER_EMAIL/g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
-sed -i "s#/var/www/html#/var/www/churchcrm#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
+sed -i "s#/var/www/html#/var/www/owncloud#g" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
 sed -i "/ServerAdmin/a         ServerName $DOMAIN_OWNCLOUD.$TOP_DOMAIN" /etc/apache2/sites-available/$DOMAIN_OWNCLOUD.$TOP_DOMAIN.conf
 
 a2ensite $DOMAIN_OWNCLOUD.$TOP_DOMAIN
